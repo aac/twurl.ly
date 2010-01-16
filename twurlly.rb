@@ -4,23 +4,32 @@ require 'rubygems'
 require 'twitter'
 require 'net/http'
 
-class TweetStalker
-  # this is a hack.  timeline fails on since_id 0, and we subtract 1 in order to make sure we've got all the missing tweets
+# Twurl.ly !
+class Twurlly
+  #twitter has a limit of 3200 tweets stored per person.  
+  #this is a hacky starting point that should be generalized
+  #to other feeds
+  
   @@last_id_checked = 6000000000
+  
+  #downloads the given url
+  def download url
+    uri = URI.parse url
+    Net::HTTP.start(uri.host) { |http|
+      resp = http.get(uri.path)
 
-  def download file
-    Net::HTTP.start("static.flickr.com") { |http|
-      resp = http.get("/92/218926700_ecedc5fef7_o.jpg")
-      
-      #open("fun.jpg", "wb") { |file|
-      #file.write(resp.body)
-      #}
+      #pulls the filename out of the response from the eztv redirect
+      #then saves the file to that filename in the current directory
+      rxp = Regexp.new(/filename="([^"].*)"/)
+      filename = rxp.match(resp['content-disposition'])[1]
+      open(filename, "wb"){ |file|
+        file.write(resp.body)
+      }
     }
-
   end
 
   #returns a list of urls to download
-  def stalk(user_name, keys)
+  def stalk(user_name, keys, debug)
     timeline = []
     page = 1
     hit_limit = false
@@ -37,11 +46,14 @@ class TweetStalker
     end
 
     urls = []
+
     timeline.each do |tweet|
       text = tweet[:text].downcase
       keys.each do |key|
         if (text.include? key.downcase)
-          puts text[/http:(\/{2})(\S*)/]
+          fn = debug ? method(:puts) : method(:download)
+          #pattern match from http:// up to the next white space
+          fn.call(text[/http:(\/{2})(\S*)/])
         end
       end
     end
@@ -50,7 +62,7 @@ end
 
 if __FILE__ == $0
   begin
-    ts0 = TweetStalker.new
-    ts0.stalk("eztv_it", ["nip","grey"])
+    ts0 = Twurlly.new
+    ts0.stalk("eztv_it", ["nip","grey"], true)
   end
 end
