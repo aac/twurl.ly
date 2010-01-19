@@ -97,8 +97,5 @@ if __FILE__ == $0
     patterns = keys.map {|key| eval("/^%s\\s+s\\d+e\\d+/i" % key)}
 
       ts0.stalk(user_name, patterns, true)
-      File.open(Data_file, 'w') { |f|
-          Marshal.dump(ts0, f)
-        }
   end
 end
