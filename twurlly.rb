@@ -96,6 +96,6 @@ if __FILE__ == $0
     keys = ["nip tuck", "grey's anatomy", "house"]
     patterns = keys.map {|key| eval("/^%s\\s+s\\d+e\\d+/i" % key)}
 
-      ts0.stalk(user_name, patterns, true)
+    ts0.stalk(user_name, patterns, true)
   end
 end
