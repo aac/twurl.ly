@@ -23,7 +23,12 @@ class Twurlly
       Twurlly.new
     end
   end
-    
+
+  def self.set twurlly
+    File.open(DATA_FILE,"w") {|file|
+      Marshal.dump(twurlly, file)
+    }
+  end    
   
   def initialize
     @last_id_checked = 6000000000
@@ -93,9 +98,11 @@ if __FILE__ == $0
     ts0 = Twurlly::get
 
     user_name = "eztv_it"
-    keys = ["nip tuck", "grey's anatomy", "house"]
+    keys = ["nip tuck", "greys anatomy", "house"]
     patterns = keys.map {|key| eval("/^%s\\s+s\\d+e\\d+/i" % key)}
 
-    ts0.stalk(user_name, patterns, true)
+    ts0.stalk(user_name, patterns, false)
+
+    Twurlly.set(ts0)
   end
 end
